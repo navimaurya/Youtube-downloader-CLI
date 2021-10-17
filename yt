@@ -1,0 +1,258 @@
+#!/bin/bash
+
+# Const variable
+declare -r DIR="$HOME/YT"
+FORMATETYPE="mkv"
+
+declare -r ytFile="/tmp/yt.txt"
+declare -r ytErrorFile="/tmp/dlyt.error.txt"
+declare -A rsFormats
+declare -A list
+list[SD]="480p"
+list[HD]="720p"
+list[FHD]="1080p"
+list[2K]="1440p"
+list[4K]="2160p"
+list[Audio]="audio only"
+
+ytdl=$(which youtube-dl)
+echo $ytdl
+if [[ ${#ytdl} < 1 ]] ;then
+	tput setaf 1
+	echo "Your system does not have youtube-dl."
+	echo -e "Please follow the link for installation steps, \033[32mhttps://ytdl-org.github.io/youtube-dl/download.html\033[0m"
+	tput sgr0
+	exit 0
+fi
+
+# LOGO 
+
+ARGS=("$@")
+if [[ ${#ARGS[@]} > 0 ]] ;then
+	echo "${ARGS[@]} "
+	youtube-dl "${ARGS[@]}"
+	exit 0
+fi
+
+url=""
+function terminate {
+	tput sgr0
+	printf '\n%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+	tput setaf 3
+	printf "\n"
+	echo "	Are you sure want to exit?"
+	printf "\n"
+	tput sgr0
+	tput setaf 1
+	select ch in "Confirm" "Cancle" ;do
+		
+		case $ch in
+			Confirm)
+				tput setaf 2
+				echo -e "\nThanks for using me :)"
+				echo -e "See you soon \033[1;33m$USER\033[0m :)!"
+				# echo -e "\nThanks for using me :)"
+				#echo -e "See you soon!!!!!!!!!!!!!!!!"
+				echo ""
+				tput sgr0
+				break
+				;;
+			Cancle) 
+				tput setaf 2
+				echo -e "\nPlease wait\033[5;31m...\033[0m"
+				echo -e "\033[1;32mWe are re-initializing program...\033[0m\n"
+				tput sgr0
+				YT
+				exit 0
+				;;
+			*|"") tput setaf 2
+				echo -e "\nThanks for using me :)"
+				echo -e "See you soon \033[1;33m$USER\033[0m :)!"
+				echo ""
+				tput sgr0
+				exit 0
+		esac
+		#tput setaf 3
+	done
+	tput sgr0
+	printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+	exit 0
+}
+
+trap terminate SIGINT
+sleep 1
+
+tput setaf 37
+cat << EndOfText
+			 __     ______  _    _ _______ _    _ ____  ______ 
+			 \ \   / / __ \| |  | |__   __| |  | |  _ \|  ____|
+			  \ \_/ | |  | | |  | |  | |  | |  | | |_) | |__   
+			   \   /| |  | | |  | |  | |  | |  | |  _ <|  __|  
+			    | | | |__| | |__| |  | |  | |__| | |_) | |____ 
+			    |_|  \____/ \____/   |_|   \____/|____/|______| POWERED BY: youtube-dl
+			                                                   
+
+EndOfText
+
+tput sgr0
+
+#Creating Yt folder
+
+function access {
+
+if ! [ -d "$HOME/YT" ] ;then
+  # Take action if $DIR exists. #
+  echo -e "Creating a YT directory in \033[31m$HOME\033[0m"
+  sudo mkdir -p "$DIR" && sudo chmod 777 "$DIR"
+fi
+
+}
+#Video option fuction
+function getVideoOptions {
+	echo "Setect video Quality "
+select formate in "${!rsFormats[@]}" "Default(best)" "Potions" "Quit"
+do
+	printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+	output="$DIR/%(title)s.%(ext)s"
+	case $formate in
+		SD)  echo -e "\nYour selection is $formate"
+			#youtube-dl -f 137+bestaudio --merge-output-format mkv
+		     cmd="youtube-dl -f  ${rsFormats[$formate]}+${rsFormats[Audio]} -o $output --merge-output-format $FORMATETYPE  $url"
+		     ($cmd)
+		     break
+		     ;;
+		HD)  echo "Your selection is $formate"
+		     cmd="youtube-dl -f  ${rsFormats[$formate]}+${rsFormats[Audio]} -o $output --merge-output-format $FORMATETYPE  $url"
+		     ($cmd)
+		     break
+		     ;;
+		FHD)  echo "Your selection is $formate"
+		     cmd="youtube-dl -f  ${rsFormats[$formate]}+${rsFormats[Audio]} -o $output --merge-output-format $FORMATETYPE  $url"
+		     ($cmd)
+		     break
+		     ;;
+		2K)  echo "Your selection is $formate"
+		     cmd="youtube-dl -f  ${rsFormats[$formate]}+${rsFormats[Audio]} -o $output --merge-output-format $FORMATETYPE  $url"
+		     ($cmd)
+		     break
+		     ;;
+		4K)  echo "Your selection is $formate"
+		     cmd="youtube-dl -f  ${rsFormats[$formate]}+${rsFormats[Audio]} -o $output --merge-output-format $FORMATETYPE  $url"
+		     ($cmd)
+		     break
+		     ;;
+		Audio)  echo "Your selection is $formate MP3"
+		     cmd="youtube-dl -o $output --extract-audio --audio-format mp3 $url"
+		     ($cmd)
+		     break
+		     ;;
+		"Default(best)") echo "Your selection is $formate"
+		     			cmd="youtube-dl -o $output $url"
+		     			($cmd)
+		     			break
+		     			;;
+		"Potions") 
+				select op in "Re-enter url" "Change Format" "<--Back" ;do
+					case $op in 
+						"Change Format")
+							echo "Change video Format to mp4|mkv|flv|webm"
+									select ch in "mp4" "mkv" "flv" "webm" "Default(Enter)" ;do
+										case $ch in 
+											mp4)
+												FORMATETYPE=$ch
+		     								break
+		     								;;
+		     							mkv)
+												FORMATETYPE=$ch
+		     								break
+		     								;;
+		     							flv)
+												FORMATETYPE=$ch
+		     								break
+		     								;;
+		     							webm)
+												FORMATETYPE=$ch
+		     								break
+		     								;;
+		     							*|"Default(Enter)")
+												FORMATETYPE="mkv"
+		     								break
+		     								;;
+										esac
+									done
+									getVideoOptions
+									exit 0
+		     			;;
+						"Re-enter url") url=""
+							printf "Provide new url"
+							YT
+							exit 0
+							;;
+					esac
+				done
+				break
+				;;
+		Quit|q)  terminate
+			break
+			;;
+		*) echo -e "\033[31mOh Ooo! Be careful while selecting \033[0m"
+	esac
+	#printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+done
+}
+
+function YT {
+ 
+#Granting Access
+access
+
+
+function resulation {
+	rs="$( grep $1 <<< cat "$ytFile" )"
+	resulationList="$(cut -d ' ' -f 1 <<< $rs)"
+	declare -i id=0
+	for f in $resulationList
+	do
+		id="(($f))"
+	done
+	echo $id
+}
+# Varifying URL
+if [[ -z $url ]] ;then
+	regex='(https?|ftp|file)://[-A-Za-z0-9\+&@#/%?=~_|!:,.;]*[-A-Za-z0-9\+&@#/%=~_|]'
+	tput setaf 2
+	read -p "YouTube URL : " url
+	tput sgr0
+	while true
+	do
+		if [[ $url =~ $regex ]] ;then 
+    	break
+		else
+			printf " \033[31mBade input \033[0m"
+			tput setaf 2
+    	read -p "YouTube URL : " url
+    	tput sgr0
+		fi
+	done
+	echo -e "\033[32mVarifying URL...\033[0m"
+fi
+#Saving youtube data into file
+youtube-dl -F $url 1>$ytFile  2>$ytErrorFile
+
+for i in "${!list[@]}";do
+	id=$(resulation ${list[$i]})
+	#echo $i : ${list[$i]} : $id
+	if [[ $id -gt 0 ]];then
+		rsFormats[$i]=$id		
+	fi
+done
+
+echo ""
+printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+getVideoOptions
+echo ""
+
+}
+
+# Calling YT Function And starting programm
+YT
